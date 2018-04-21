@@ -74,7 +74,7 @@ Class | Method | HTTP request | Description
 *FileApi* | [**list_user_files**](docs/FileApi.md#list_user_files) | **GET** /files | List the user&#39;s files
 *FileApi* | [**upload_file**](docs/FileApi.md#upload_file) | **POST** /files/{filename} | uploads a file
 *UserApi* | [**create_user**](docs/UserApi.md#create_user) | **POST** /register | Create a new user
-*UserApi* | [**login_user**](docs/UserApi.md#login_user) | **GET** /login | Logs user into the system
+*UserApi* | [**login_user**](docs/UserApi.md#login_user) | **POST** /login | Logs user into the system
 
 
 ## Documentation For Models

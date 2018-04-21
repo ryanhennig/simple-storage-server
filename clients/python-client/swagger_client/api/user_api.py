@@ -202,7 +202,7 @@ class UserApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/login', 'GET',
+            '/login', 'POST',
             path_params,
             query_params,
             header_params,

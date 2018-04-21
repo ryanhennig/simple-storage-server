@@ -23,7 +23,7 @@ MyApp.add_route('POST', '/v1/register', {
 end
 
 
-MyApp.add_route('GET', '/v1/login', {
+MyApp.add_route('POST', '/v1/login', {
   "resourcePath" => "/User",
   "summary" => "Logs user into the system",
   "nickname" => "login_user", 

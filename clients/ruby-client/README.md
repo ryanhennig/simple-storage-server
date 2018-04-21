@@ -81,7 +81,7 @@ Class | Method | HTTP request | Description
 *SwaggerClient::FileApi* | [**list_user_files**](docs/FileApi.md#list_user_files) | **GET** /files | List the user's files
 *SwaggerClient::FileApi* | [**upload_file**](docs/FileApi.md#upload_file) | **POST** /files/{filename} | uploads a file
 *SwaggerClient::UserApi* | [**create_user**](docs/UserApi.md#create_user) | **POST** /register | Create a new user
-*SwaggerClient::UserApi* | [**login_user**](docs/UserApi.md#login_user) | **GET** /login | Logs user into the system
+*SwaggerClient::UserApi* | [**login_user**](docs/UserApi.md#login_user) | **POST** /login | Logs user into the system
 
 
 ## Documentation for Models

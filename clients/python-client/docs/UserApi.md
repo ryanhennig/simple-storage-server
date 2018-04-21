@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost/v1*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_user**](UserApi.md#create_user) | **POST** /register | Create a new user
-[**login_user**](UserApi.md#login_user) | **GET** /login | Logs user into the system
+[**login_user**](UserApi.md#login_user) | **POST** /login | Logs user into the system
 
 
 # **create_user**

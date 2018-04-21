@@ -38,7 +38,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
   /login:
-    get:
+    post:
       tags:
       - "user"
       summary: "Logs user into the system"
