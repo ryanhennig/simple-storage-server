@@ -1,0 +1,224 @@
+---
+swagger: "2.0"
+info:
+  description: "A Simple Storage Server API"
+  version: "1.0.0"
+  title: "Simple Storage Server"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost"
+basePath: "/v1"
+tags:
+- name: "file"
+  description: "File related operations"
+- name: "user"
+  description: "User related operations"
+schemes:
+- "http"
+paths:
+  /register:
+    post:
+      tags:
+      - "user"
+      summary: "Create a new user"
+      operationId: "createUser"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "user object to create"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "registration error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /login:
+    get:
+      tags:
+      - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "user object to create"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "Body"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/SessionToken"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        403:
+          description: "Login Failure"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /files:
+    get:
+      tags:
+      - "file"
+      summary: "List the user's files"
+      operationId: "listUserFiles"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Session"
+        in: "header"
+        description: "Session token given at login"
+        required: true
+        type: "string"
+        x-exportParamName: "XSession"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        403:
+          description: "Not logged in"
+  /files/{filename}:
+    get:
+      tags:
+      - "file"
+      summary: "download a file"
+      description: "Returns a single file"
+      operationId: "getFileByName"
+      parameters:
+      - name: "X-Session"
+        in: "header"
+        description: "Session token given at login"
+        required: true
+        type: "string"
+        x-exportParamName: "XSession"
+      - name: "filename"
+        in: "path"
+        description: "name of the file"
+        required: true
+        type: "string"
+        x-exportParamName: "Filename"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "file"
+        403:
+          description: "Not logged in"
+        404:
+          description: "File not found"
+    post:
+      tags:
+      - "file"
+      summary: "uploads a file"
+      description: ""
+      operationId: "uploadFile"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Session"
+        in: "header"
+        description: "Session token given at login"
+        required: true
+        type: "string"
+        x-exportParamName: "XSession"
+      - name: "filename"
+        in: "path"
+        description: "name of the file"
+        required: true
+        type: "string"
+        x-exportParamName: "Filename"
+      - name: "file"
+        in: "formData"
+        description: "file to upload"
+        required: false
+        type: "file"
+        x-exportParamName: "File"
+      responses:
+        201:
+          description: "successful creation"
+    delete:
+      tags:
+      - "file"
+      summary: "Deletes a file"
+      description: ""
+      operationId: "deleteFile"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Session"
+        in: "header"
+        description: "Session token given at login"
+        required: true
+        type: "string"
+        x-exportParamName: "XSession"
+      - name: "filename"
+        in: "path"
+        description: "name of the file to delete"
+        required: true
+        type: "string"
+        x-exportParamName: "Filename"
+      responses:
+        204:
+          description: "Success"
+        403:
+          description: "Not logged in"
+        404:
+          description: "Invalid File"
+definitions:
+  User:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+    example:
+      password: "password"
+      username: "username"
+  Tag:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+    xml:
+      name: "Tag"
+  ErrorResponse:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+  SessionToken:
+    type: "object"
+    properties:
+      token:
+        type: "string"
+    example:
+      token: "token"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
