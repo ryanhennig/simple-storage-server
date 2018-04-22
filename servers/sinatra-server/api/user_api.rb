@@ -1,5 +1,6 @@
 require 'json'
 
+require "sqlite3"
 
 MyApp.add_route('POST', '/v1/register', {
   "resourcePath" => "/User",
@@ -35,6 +36,33 @@ MyApp.add_route('POST', '/v1/register', {
     content_type "application/json"
     return { error: "Invalid password"}.to_json
   end
+  
+  db = MyApp.database
+  
+  # Check if user already exists
+  user_exists = false
+  db.execute( "SELECT COUNT(*) FROM users WHERE username = ?", [username] ) do |row|
+    if row[0] != 0
+      user_exists = true
+    end
+  end
+  
+  if user_exists
+    status 400
+    content_type "application/json"
+    return { error: "User already exists"}.to_json
+  end
+  
+  # Create password hash
+  require 'bcrypt'
+  password_hash = BCrypt::Password.create(password)
+  
+  
+  # Store user in DB w/ SQL injection protection
+  db.execute("INSERT INTO users (username, password_hash) 
+              VALUES (?, ?)", [username, password_hash])
+  
+  
   # ["X-Content-Type-Options", "Server", "Date", "Connection"].each do |header|
   #   # response[header] = ""
   #   response.headers.delete header
@@ -63,6 +91,38 @@ MyApp.add_route('POST', '/v1/login', {
   cross_origin
   # the guts live here
 
+  {"message" => "yes, it worked"}.to_json
+end
+
+MyApp.add_route('POST', '/v1/unregister', {
+  "resourcePath" => "/User",
+  "summary" => "Deletes user from the system",
+  "nickname" => "delete_user", 
+  "responseClass" => "SessionToken", 
+  "endpoint" => "/unregister", 
+  "notes" => "",
+  "parameters" => [
+    {
+      "name" => "body",
+      "description" => "user object to create",
+      "dataType" => "User",
+      "paramType" => "body",
+    }
+    ]}) do
+  cross_origin
+
+  body = request.body.read
+  data = JSON.parse(body)
+  
+  username = data.fetch("username", nil)
+
+  if username
+    db = MyApp.database
+
+    #TODO: This is horribly unsecure for now but convenient for testing
+    db.execute( "DELETE FROM users WHERE username = ?", [username] )  
+  end
+  
   {"message" => "yes, it worked"}.to_json
 end
 

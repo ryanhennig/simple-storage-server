@@ -4,12 +4,17 @@ require 'sinatra/cross_origin'
 
 class Configuration
   attr_accessor :base_path, :api_version, :swagger_version, :format_specifier
-
+  
+  #The path of the SQLite Database file
+  attr_accessor :database_path
+  
   def initialize
     @api_version = '1.0'
     @base_path = 'http://localhost:4567'
     @swagger_version = '1.1'
     @format_specifier = ".json"
+    
+    @database_path = "users.db"
   end
 end
 
