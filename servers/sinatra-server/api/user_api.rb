@@ -29,6 +29,12 @@ MyApp.add_route('POST', '/v1/register', {
     return { error: "Invalid username"}.to_json
   end
   
+  password = data.fetch("password", nil)
+  if not password or password.length < 8
+    status 400
+    content_type "application/json"
+    return { error: "Invalid password"}.to_json
+  end
   # ["X-Content-Type-Options", "Server", "Date", "Connection"].each do |header|
   #   # response[header] = ""
   #   response.headers.delete header

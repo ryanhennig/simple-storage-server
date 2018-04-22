@@ -20,7 +20,10 @@ describe 'UserApi' do
   before do
     # run before each test
     @instance = SwaggerClient::UserApi.new
-    @instance.api_client.config.debugging = true
+    # @instance.api_client.config.debugging = true
+    
+    @valid_username = "username"
+    @valid_password = "password"
   end
 
   after do
@@ -43,7 +46,7 @@ describe 'UserApi' do
     it "should not allow usernames less than length 3" do
       user = {
         "username": "a",
-        "password": "foobar"
+        "password": @valid_password
       }
             
       begin
@@ -64,7 +67,7 @@ describe 'UserApi' do
       expect(len21.length).to eq(21)
       user = {
         "username": len21,
-        "password": "foobar"
+        "password": @valid_password
       }
             
       begin
@@ -78,11 +81,11 @@ describe 'UserApi' do
       end
       
     end
-    
+  
     it "should allow usernames of length 4" do
       user = {
         "username": "abcd",
-        "password": "foobar"
+        "password": @valid_password
       }
       
       data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
@@ -97,7 +100,7 @@ describe 'UserApi' do
       expect(len20.length).to eq(20)
       user = {
         "username": len20,
-        "password": "foobar"
+        "password": @valid_password
       }
       
       data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
@@ -105,6 +108,41 @@ describe 'UserApi' do
       expect(status_code).to eq(204)
       expect(data).to be_nil
       #expect(headers).to eq("")
+    end
+    
+    it "should allow passwords of length 8" do
+      len8 = "abcdefgh"
+      expect(len8.length).to eq(8)
+      user = {
+        "username": "abcd",
+        "password": @valid_password
+      }
+      
+      data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+      
+      expect(status_code).to eq(204)
+      expect(data).to be_nil
+      #expect(headers).to eq("")
+    end
+    
+    
+    it "should not allow passwords less than length 8" do
+      len7 = "abcdefg"
+      expect(len7.length).to eq(7)
+      user = {
+        "username": @valid_username,
+        "password": len7
+      }
+            
+      begin
+        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+        fail "no error was thrown"
+      rescue SwaggerClient::ApiError => ae
+        expect(ae.code).to eq(400) 
+        expect(ae.response_body).to eq({ error: "Invalid password"}.to_json)
+        h = ae.response_headers
+        expect(h["Content-Type"]).to eql("application/json")
+      end
     end
     
   end
