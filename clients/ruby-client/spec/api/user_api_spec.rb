@@ -41,8 +41,6 @@ describe 'UserApi' do
   # @return [nil]
   describe 'create_user test' do
     it "should not allow usernames less than length 3" do
-      # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
-      
       user = {
         "username": "a",
         "password": "foobar"
@@ -53,16 +51,37 @@ describe 'UserApi' do
         fail "no error was thrown"
       rescue SwaggerClient::ApiError => ae
         expect(ae.code).to eq(400) 
-        expect(data).to be_nil
+        expect(ae.response_body).to eq({ error: "Invalid username"}.to_json)
+        
+        h = ae.response_headers
+        expect(h["Content-Type"]).to eql("application/json")
       end
       
     end
     
-    it "should work" do
-      # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
-      
+    it "should not allow usernames greater than length 20" do
+      len21 = "abcdefghijklmnopqrstu"
+      expect(len21.length).to eq(21)
       user = {
-        "username": "abc",
+        "username": len21,
+        "password": "foobar"
+      }
+            
+      begin
+        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+        fail "no error was thrown"
+      rescue SwaggerClient::ApiError => ae
+        expect(ae.code).to eq(400) 
+        expect(ae.response_body).to eq({ error: "Invalid username"}.to_json)
+        h = ae.response_headers
+        expect(h["Content-Type"]).to eql("application/json")
+      end
+      
+    end
+    
+    it "should allow usernames of length 4" do
+      user = {
+        "username": "abcd",
         "password": "foobar"
       }
       
@@ -72,6 +91,22 @@ describe 'UserApi' do
       expect(data).to be_nil
       #expect(headers).to eq("")
     end
+    
+    it "should allow usernames of length 20" do      
+      len20 = "abcdefghijklmnopqrst"
+      expect(len20.length).to eq(20)
+      user = {
+        "username": len20,
+        "password": "foobar"
+      }
+      
+      data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+      
+      expect(status_code).to eq(204)
+      expect(data).to be_nil
+      #expect(headers).to eq("")
+    end
+    
   end
 
   # unit tests for login_user

@@ -25,7 +25,8 @@ MyApp.add_route('POST', '/v1/register', {
   username = data.fetch("username", nil)
   if not username or username.length < 3 or username.length > 20
     status 400
-    return { message: "Invalid username"}.to_json
+    content_type "application/json"
+    return { error: "Invalid username"}.to_json
   end
   
   # ["X-Content-Type-Options", "Server", "Date", "Connection"].each do |header|
