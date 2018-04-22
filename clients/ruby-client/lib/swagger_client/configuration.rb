@@ -129,7 +129,7 @@ module SwaggerClient
 
     def initialize
       @scheme = 'http'
-      @host = 'localhost'
+      @host = 'localhost:4567'
       @base_path = '/v1'
       @api_key = {}
       @api_key_prefix = {}

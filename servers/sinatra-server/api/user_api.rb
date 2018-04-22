@@ -18,8 +18,23 @@ MyApp.add_route('POST', '/v1/register', {
     ]}) do
   cross_origin
   # the guts live here
+  
+  body = request.body.read
+  data = JSON.parse(body)
+  
+  username = data.fetch("username", nil)
+  if not username or username.length < 3 or username.length > 20
+    status 400
+    return { message: "Invalid username"}.to_json
+  end
+  
+  # ["X-Content-Type-Options", "Server", "Date", "Connection"].each do |header|
+  #   # response[header] = ""
+  #   response.headers.delete header
+  # end
+  
+  status 204
 
-  {"message" => "yes, it worked"}.to_json
 end
 
 

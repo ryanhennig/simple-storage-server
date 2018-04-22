@@ -20,6 +20,7 @@ describe 'UserApi' do
   before do
     # run before each test
     @instance = SwaggerClient::UserApi.new
+    @instance.api_client.config.debugging = true
   end
 
   after do
@@ -39,8 +40,37 @@ describe 'UserApi' do
   # @param [Hash] opts the optional parameters
   # @return [nil]
   describe 'create_user test' do
+    it "should not allow usernames less than length 3" do
+      # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
+      
+      user = {
+        "username": "a",
+        "password": "foobar"
+      }
+            
+      begin
+        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+        fail "no error was thrown"
+      rescue SwaggerClient::ApiError => ae
+        expect(ae.code).to eq(400) 
+        expect(data).to be_nil
+      end
+      
+    end
+    
     it "should work" do
       # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
+      
+      user = {
+        "username": "abc",
+        "password": "foobar"
+      }
+      
+      data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+      
+      expect(status_code).to eq(204)
+      expect(data).to be_nil
+      #expect(headers).to eq("")
     end
   end
 
