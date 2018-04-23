@@ -23,7 +23,7 @@ class MyApp < Swaggering
         create table users (
           username varchar(20) UNIQUE,
           password_hash char(60),
-          session_token varchar(24)
+          session_token varchar(24) UNIQUE
         );
       SQL
     

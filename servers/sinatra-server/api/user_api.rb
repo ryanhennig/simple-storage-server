@@ -1,5 +1,5 @@
 require 'json'
-require "sqlite3"
+require 'sqlite3'
 require 'securerandom'
 require 'bcrypt'
   
@@ -116,7 +116,15 @@ MyApp.add_route('POST', '/v1/login', {
     #Verify password
     bcrypt_password = BCrypt::Password.new(password_hash)
     if bcrypt_password == password
-      token = SecureRandom.base64
+      
+      begin
+        token = SecureRandom.base64
+        regenerate = false
+        db.execute("SELECT username FROM users WHERE session_token = ?", [token]) do |row|
+          regenerate = true
+        end
+      end while regenerate
+      
       db.execute("UPDATE users SET session_token = ? WHERE username = ? ", [token, username])
       return { token: token.to_s}.to_json
     else
