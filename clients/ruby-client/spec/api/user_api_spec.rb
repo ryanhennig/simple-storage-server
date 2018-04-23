@@ -12,6 +12,7 @@ Swagger Codegen version: 2.3.1
 
 require 'spec_helper'
 require 'json'
+require 'support/user_helpers'
 
 
 # Unit tests for SwaggerClient::UserApi
@@ -21,6 +22,8 @@ describe 'UserApi' do
   before do
     # run before each test
     @instance = SwaggerClient::UserApi.new
+
+    @instance.api_client.config.debugging = false
     # @instance.api_client.config.debugging = true
     
     @valid_username = "username"
@@ -117,9 +120,7 @@ describe 'UserApi' do
       
       create_user_failure(user, "Invalid password")            
     end
-        
-
-    
+      
   end
 
   # unit tests for login_user
@@ -130,13 +131,11 @@ describe 'UserApi' do
   # @return [SessionToken]
   describe 'login_user' do
     it "should work" do
-      @instance.api_client.config.debugging = true
       create_user_successfully(@valid_user)
       login_user_successfully(@valid_user)
     end
     
     it "should not accept invalid password" do
-      @instance.api_client.config.debugging = false
       create_user_successfully(@valid_user)
       
       wrong_pass = {
@@ -144,66 +143,6 @@ describe 'UserApi' do
         password: "wrong_password"
       }
       login_user_failure(wrong_pass, "Invalid password")
-    end
-  end
-  
-  def create_user_successfully(user)
-    begin
-      @instance.delete_user(user)
-      data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
-    rescue SwaggerClient::ApiError => ae
-      output = {
-        "code": ae.code,
-        "response": ae.response_body
-      }
-      expect(output).to be_nil
-    end
-  
-    expect(status_code).to eq(204)
-    expect(data).to be_nil
-  
-    return data, status_code, headers
-  end
-  
-  def create_user_failure(user, error)
-    begin
-      data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
-      fail "no error was thrown"
-    rescue SwaggerClient::ApiError => ae
-      expect(ae.code).to eq(400) 
-      expect(ae.response_body).to eq({ error: error}.to_json)
-      h = ae.response_headers
-      expect(h["Content-Type"]).to eql("application/json")
-    end
-  end
-  
-  def login_user_successfully(user)
-    begin
-      data, status_code, headers = @instance.login_user_with_http_info(user.to_json)
-    rescue SwaggerClient::ApiError => ae
-      output = {
-        "code": ae.code,
-        "response": ae.response_body
-      }
-      expect(output).to be_nil
-    end
-  
-    expect(status_code).to eq(200)
-  
-    expect(data.token).to be_truthy
-  
-    return data, status_code, headers
-  end
-  
-  def login_user_failure(user, error)
-    begin
-      data, status_code, headers = @instance.login_user_with_http_info(user.to_json)
-      fail "no error was thrown"
-    rescue SwaggerClient::ApiError => ae
-      expect(ae.code).to eq(403) 
-      expect(ae.response_body).to eq({ error: error}.to_json)
-      h = ae.response_headers
-      expect(h["Content-Type"]).to eql("application/json")
     end
   end
 
