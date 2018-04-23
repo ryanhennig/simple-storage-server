@@ -51,17 +51,7 @@ describe 'UserApi' do
         "password": @valid_password
       }
             
-      begin
-        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
-        fail "no error was thrown"
-      rescue SwaggerClient::ApiError => ae
-        expect(ae.code).to eq(400) 
-        expect(ae.response_body).to eq({ error: "Invalid username"}.to_json)
-        
-        h = ae.response_headers
-        expect(h["Content-Type"]).to eql("application/json")
-      end
-      
+      create_user_failure(user, "Invalid username")  
     end
     
     it "should not allow usernames greater than length 20" do
@@ -72,16 +62,17 @@ describe 'UserApi' do
         "password": @valid_password
       }
             
-      begin
-        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
-        fail "no error was thrown"
-      rescue SwaggerClient::ApiError => ae
-        expect(ae.code).to eq(400) 
-        expect(ae.response_body).to eq({ error: "Invalid username"}.to_json)
-        h = ae.response_headers
-        expect(h["Content-Type"]).to eql("application/json")
-      end
+      create_user_failure(user, "Invalid username")        
+    end
+    
+    it "should not allow user to be registered twice" do
+      user = {
+        "username": @valid_username,
+        "password": @valid_password
+      }
       
+      create_user_successfully(user) 
+      create_user_failure(user, "User already exists")                  
     end
   
     it "should allow usernames of length 4" do
@@ -123,16 +114,8 @@ describe 'UserApi' do
         "username": @valid_username,
         "password": len7
       }
-            
-      begin
-        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
-        fail "no error was thrown"
-      rescue SwaggerClient::ApiError => ae
-        expect(ae.code).to eq(400) 
-        expect(ae.response_body).to eq({ error: "Invalid password"}.to_json)
-        h = ae.response_headers
-        expect(h["Content-Type"]).to eql("application/json")
-      end
+      
+      create_user_failure(user, "Invalid password")            
     end
     
     def create_user_successfully(user)
@@ -151,6 +134,18 @@ describe 'UserApi' do
       expect(data).to be_nil
     
       return data, status_code, headers
+    end
+    
+    def create_user_failure(user, error)
+      begin
+        data, status_code, headers = @instance.create_user_with_http_info(user.to_json)
+        fail "no error was thrown"
+      rescue SwaggerClient::ApiError => ae
+        expect(ae.code).to eq(400) 
+        expect(ae.response_body).to eq({ error: error}.to_json)
+        h = ae.response_headers
+        expect(h["Content-Type"]).to eql("application/json")
+      end
     end
     
   end
