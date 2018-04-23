@@ -1,7 +1,8 @@
 require 'json'
-
 require "sqlite3"
-
+require 'securerandom'
+require 'bcrypt'
+  
 MyApp.add_route('POST', '/v1/register', {
   "resourcePath" => "/User",
   "summary" => "Create a new user",
@@ -54,13 +55,13 @@ MyApp.add_route('POST', '/v1/register', {
   end
   
   # Create password hash
-  require 'bcrypt'
+
   password_hash = BCrypt::Password.create(password)
   
   
   # Store user in DB w/ SQL injection protection
   db.execute("INSERT INTO users (username, password_hash) 
-              VALUES (?, ?)", [username, password_hash])
+              VALUES (?, ?)", [username, password_hash.to_s])
   
   
   # ["X-Content-Type-Options", "Server", "Date", "Connection"].each do |header|
@@ -89,7 +90,40 @@ MyApp.add_route('POST', '/v1/login', {
     }
     ]}) do
   cross_origin
-  # the guts live here
+  content_type "application/json"
+
+  body = request.body.read
+  data = JSON.parse(body)
+  
+  username = data.fetch("username", nil)  
+  password = data.fetch("password", nil)
+  if not username or not password
+    status 403
+    return { error: "Must provide username and password"}.to_json
+  end
+
+  db = MyApp.database
+  
+  # Check if user already exists
+  user_found = false
+  password_hash = nil
+  db.execute( "SELECT password_hash FROM users WHERE username = ?", [username] ) do |row|
+    user_found = true
+    password_hash = row[0]
+  end
+  
+  if user_found
+    #Verify password
+    bcrypt_password = BCrypt::Password.new(password_hash)
+    if bcrypt_password == password
+      token = SecureRandom.base64
+      db.execute("UPDATE users SET session_token = ? WHERE username = ? ", [token, username])
+      return { token: token.to_s}.to_json
+    else
+      status 403
+      return { error: "Invalid password"}.to_json
+    end
+  end
 
   {"message" => "yes, it worked"}.to_json
 end
@@ -123,6 +157,7 @@ MyApp.add_route('POST', '/v1/unregister', {
     db.execute( "DELETE FROM users WHERE username = ?", [username] )  
   end
   
+  content_type "application/json"
   {"message" => "yes, it worked"}.to_json
 end
 

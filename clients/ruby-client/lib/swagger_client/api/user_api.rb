@@ -72,7 +72,7 @@ module SwaggerClient
 
     # Logs user into the system
     # 
-    # @param body user object to create
+    # @param body user object to login
     # @param [Hash] opts the optional parameters
     # @return [SessionToken]
     def login_user(body, opts = {})
@@ -82,7 +82,7 @@ module SwaggerClient
 
     # Logs user into the system
     # 
-    # @param body user object to create
+    # @param body user object to login
     # @param [Hash] opts the optional parameters
     # @return [Array<(SessionToken, Fixnum, Hash)>] SessionToken data, response status code and response headers
     def login_user_with_http_info(body, opts = {})
