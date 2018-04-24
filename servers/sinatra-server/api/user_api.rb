@@ -117,15 +117,24 @@ MyApp.add_route('POST', '/v1/login', {
     bcrypt_password = BCrypt::Password.new(password_hash)
     if bcrypt_password == password
       
-      begin
-        token = SecureRandom.base64
-        regenerate = false
-        db.execute("SELECT username FROM users WHERE session_token = ?", [token]) do |row|
-          regenerate = true
-        end
-      end while regenerate
+      #Return the existing token if it exists
+      token = nil
+      db.execute("SELECT session_token FROM users WHERE username = ?", [username]) do |row|
+        token = row[0]
+      end
       
-      db.execute("UPDATE users SET session_token = ? WHERE username = ? ", [token, username])
+      if not token
+        begin
+          token = SecureRandom.hex
+          regenerate = false
+          db.execute("SELECT username FROM users WHERE session_token = ?", [token]) do |row|
+            regenerate = true
+          end
+        end while regenerate
+      
+        db.execute("UPDATE users SET session_token = ? WHERE username = ? ", [token, username])
+      end
+      
       return { token: token.to_s}.to_json
     else
       status 403

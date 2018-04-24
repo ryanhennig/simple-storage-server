@@ -1,6 +1,7 @@
 require './lib/swaggering'
+require './lib/file_storage'
 require "sqlite3"
-    
+        
 # only need to extend if you want special configuration!
 class MyApp < Swaggering
   self.configure do |config|
@@ -10,6 +11,12 @@ class MyApp < Swaggering
   def initialize
     super
     init_db
+  end
+  
+  helpers do
+    def request_headers
+      env.inject({}){|acc, (k,v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc}
+    end  
   end
 
   def init_db
@@ -23,7 +30,7 @@ class MyApp < Swaggering
         create table users (
           username varchar(20) UNIQUE,
           password_hash char(60),
-          session_token varchar(24) UNIQUE
+          session_token varchar(32) UNIQUE
         );
       SQL
     
@@ -31,7 +38,7 @@ class MyApp < Swaggering
   end
   
   def MyApp.database
-    SQLite3::Database.new @@configuration.database_path
+    @@database ||= SQLite3::Database.new @@configuration.database_path
   end
   
 end

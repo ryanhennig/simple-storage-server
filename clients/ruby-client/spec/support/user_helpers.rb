@@ -1,4 +1,5 @@
 module UserHelpers
+  
   def create_user_successfully(user)
     begin
       @instance.delete_user(user)
@@ -44,7 +45,7 @@ module UserHelpers
   
     expect(data.token).to be_truthy
   
-    return data, status_code, headers
+    return data.token
   end
   
   def login_user_failure(user, error)

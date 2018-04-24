@@ -146,4 +146,79 @@ describe 'UserApi' do
     end
   end
 
+  # unit tests for delete_file
+  # Deletes a file
+  # 
+  # @param x_session Session token given at login
+  # @param filename name of the file to delete
+  # @param [Hash] opts the optional parameters
+  # @return [nil]
+  describe 'delete_file test' do
+    it "should work" do
+      # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
+    end
+  end
+
+  # unit tests for get_file_by_name
+  # download a file
+  # Returns a single file
+  # @param x_session Session token given at login
+  # @param filename name of the file
+  # @param [Hash] opts the optional parameters
+  # @return [File]
+  describe 'get_file_by_name test' do
+    it "should work" do
+      # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
+    end
+  end
+
+  # unit tests for list_user_files
+  # List the user&#39;s files
+  # 
+  # @param x_session Session token given at login
+  # @param [Hash] opts the optional parameters
+  # @return [Array<String>]
+  describe 'list_user_files test' do
+    it "should return empty list for new user", :focus => true do
+      # create_user_successfully(@valid_user)
+      session_token = login_user_successfully(@valid_user)
+            
+      files = @instance.list_user_files(session_token)
+      
+      expect(files).to match_array([])
+    end
+    
+    it "should fail with missing session token" do
+      create_user_successfully(@valid_user)
+      session_token = login_user_successfully(@valid_user)
+      
+      # files = @instance.list_user_files("")
+      list_files_failure("")
+    end
+    
+  end
+  
+  def list_files_failure(token)
+    begin
+      data, status_code, headers = @instance.list_user_files_with_http_info(token)
+      fail "no error was thrown"
+    rescue SwaggerClient::ApiError => ae
+      expect(ae.code).to eq(403) 
+    end
+  end
+
+  # unit tests for upload_file
+  # uploads a file
+  # 
+  # @param x_session Session token given at login
+  # @param filename name of the file
+  # @param [Hash] opts the optional parameters
+  # @option opts [File] :file file to upload
+  # @return [nil]
+  describe 'upload_file test' do
+    it "should work" do
+      # assertion here. ref: https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers
+    end
+  end
+
 end
