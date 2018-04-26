@@ -257,7 +257,6 @@ describe 'UserApi' do
   
   def upload_file_successfully(token, filename, file_content)
     begin
-      # @instance.api_client.config.debugging = true
       data, status_code, headers = @instance.upload_file_with_http_info(token, filename, file_content)
     rescue SwaggerClient::ApiError => ae
       output = {
@@ -278,7 +277,6 @@ describe 'UserApi' do
   
   def download_file_successfully(token, filename, content_type = nil)
     begin
-      # @instance.api_client.config.debugging = true
       data, status_code, headers = @instance.get_file_by_name_with_http_info(token, filename)
     rescue SwaggerClient::ApiError => ae
       output = {
@@ -308,7 +306,6 @@ describe 'UserApi' do
   
   def upload_file_failure(token, filename, file_content, error)
     begin
-      # @instance.api_client.config.debugging = true
       data, status_code, headers = @instance.upload_file_with_http_info(token, filename, file_content)
     rescue SwaggerClient::ApiError => ae
       output = {
