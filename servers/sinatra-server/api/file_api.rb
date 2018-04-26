@@ -113,14 +113,16 @@ MyApp.add_route('GET', '/v1/files', {
   username = results[0][0]
 
   if not username
-    status 403  end
+    status 403  
+    return
+  end
 
   file_list = FileStorage.get_filenames(username)
   file_list.to_json
 end
 
 
-MyApp.add_route('POST', '/v1/files/{filename}', {
+MyApp.add_route('PUT', '/v1/files/{filename}', {
   "resourcePath" => "/File",
   "summary" => "uploads a file",
   "nickname" => "upload_file", 
@@ -142,8 +144,18 @@ MyApp.add_route('POST', '/v1/files/{filename}', {
     },
     ]}) do
   cross_origin
-  # the guts live here
+  
+  filename = params[:filename]
+  
+  if not /^[\w\-. ]+$/ === filename
+    status 403
+    content_type "application/json"
+    return {error: "Invalid filename"}.to_json
+  end
+  
+  status 201
+  headers["Location"] = "/files/#{filename}"
+  # location "/files/#{filename}"
 
-  {"message" => "yes, it worked"}.to_json
 end
 

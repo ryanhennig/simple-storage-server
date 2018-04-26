@@ -351,7 +351,7 @@ module SwaggerClient
     # @param [Hash] opts the optional parameters
     # @option opts [File] :file file to upload
     # @return [nil]
-    def upload_file(x_session, filename, opts = {})
+    def upload_file(x_session, filename, file_content, content_type, opts = {})
       upload_file_with_http_info(x_session, filename, opts)
       return nil
     end
@@ -363,7 +363,7 @@ module SwaggerClient
     # @param [Hash] opts the optional parameters
     # @option opts [File] :file file to upload
     # @return [Array<(nil, Fixnum, Hash)>] nil, response status code and response headers
-    def upload_file_with_http_info(x_session, filename, opts = {})
+    def upload_file_with_http_info(x_session, filename, file_content, content_type = nil, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug "Calling API: FileApi.upload_file ..."
       end
@@ -384,24 +384,32 @@ module SwaggerClient
       # header parameters
       header_params = {}
       # HTTP header 'Accept' (if needed)
-      header_params['Accept'] = @api_client.select_header_accept(['application/json'])
+      # header_params['Accept'] = @api_client.select_header_accept(['application/json'])
       # HTTP header 'Content-Type'
-      header_params['Content-Type'] = @api_client.select_header_content_type(['multipart/form-data'])
+
+      if not content_type
+        #TODO: Use library to autodetect
+        content_type = "application/octet-stream"
+      end
+            
+      header_params['Content-Type'] = content_type
       header_params[:'X-Session'] = x_session
 
       # form parameters
-      form_params = {}
-      form_params["file"] = opts[:'file'] if !opts[:'file'].nil?
+      # form_params = {}
+      # form_params["file"] = opts[:'file'] if !opts[:'file'].nil?
 
       # http body (model)
-      post_body = nil
-      auth_names = []
-      data, status_code, headers = @api_client.call_api(:POST, local_var_path,
+#      post_body = nil
+      # auth_names = []
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path,
         :header_params => header_params,
         :query_params => query_params,
-        :form_params => form_params,
-        :body => post_body,
-        :auth_names => auth_names)
+        #:form_params => form_params,
+        # :body => post_body,
+        :body => file_content
+        # :auth_names => auth_names
+        )
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: FileApi#upload_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
