@@ -24,12 +24,21 @@ class FileStorage
   end
   
   def get_filenames(username)
-    []
+    begin
+      parent_dir = user_root(username)
+    
+      if not Dir.exists?(parent_dir)
+        return []
+      end
+    
+      return Dir.entries(parent_dir).select {|f| !File.directory? f}
+      
+    rescue => e
+      return nil, e.to_s
+    end
   end
     
-  def write_file(username, filename, content)
-    error = nil
-    
+  def write_file(username, filename, content)    
     begin
       parent_dir = user_root(username)
       
@@ -39,6 +48,11 @@ class FileStorage
       end
       
       fullpath = File.join(parent_dir, filename)
+      
+      #Extra security check to be paranoid
+      if not fullpath.start_with?(parent_dir)
+        return "File not found"
+      end
       
       File.open(fullpath, "w") do |f|
         f.write(content)
@@ -53,21 +67,62 @@ class FileStorage
   end
   
   def read_file(username, filename)
+    begin
+      parent_dir = user_root(username)
+    
+      if not Dir.exists?(parent_dir)
+        return nil, "User has no files"
+      end
+    
+      fullpath = File.join(parent_dir, filename)
+    
+      #Extra security check to be paranoid
+      if not fullpath.start_with?(parent_dir)
+        return nil, "File not found"
+      end
+    
+      if not File.exists?(fullpath)
+        return nil, "File does not exist"
+      end
+    
+      content = File.read(fullpath)
+      return content, nil
+    rescue => e
+      return nil, e.to_s
+    end
+  end
+  
+  def delete_file(username, filename)
     parent_dir = user_root(username)
     
     if not Dir.exists?(parent_dir)
-      return nil, "User has no files"
+      return "User has no files"
     end
     
     fullpath = File.join(parent_dir, filename)
     
-    if not File.exists?(fullpath)
-      return nil, "File does not exist"
+    #Extra security check to be paranoid
+    if not fullpath.start_with?(parent_dir)
+      return "File not found"
     end
     
-    content = File.read(fullpath)
+    if not File.exists?(fullpath)
+      return "File does not exist"
+    end
     
-    return content, nil
+    File.delete(fullpath)
+    
+    return nil
+  end
+  
+  def delete_all_files(username)
+    parent_dir = user_root(username)
+    
+    if not Dir.exists?(parent_dir)
+      return
+    end
+    
+    FileUtils.rm_r parent_dir
   end
   
 end

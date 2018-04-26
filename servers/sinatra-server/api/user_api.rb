@@ -165,13 +165,15 @@ MyApp.add_route('POST', '/v1/unregister', {
 
   body = request.body.read
   data = JSON.parse(body)
-  
+
+  #TODO: This method is horribly unsecure for now but convenient for testing  
   username = data.fetch("username", nil)
 
   if username
     db = MyApp.database
 
-    #TODO: This is horribly unsecure for now but convenient for testing
+    MyApp.file_storage.delete_all_files(username)
+
     db.execute( "DELETE FROM users WHERE username = ?", [username] )  
   end
   

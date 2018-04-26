@@ -232,6 +232,16 @@ describe 'UserApi' do
 
       #Verify that the file content is the same
       expect(file_content).to eql(download_content)
+      
+      #Verify that file is listed
+      files = @instance.list_user_files(token)
+      expect(files).to include(filename)
+      
+      @instance.delete_file(token, filename)
+      
+      #Verify that file was deleted
+      files = @instance.list_user_files(token)
+      expect(files).not_to include(filename)
     end
     
     it "should not accept invalid filenames", focus: true do
@@ -268,7 +278,7 @@ describe 'UserApi' do
   
   def download_file_successfully(token, filename, content_type = nil)
     begin
-      @instance.api_client.config.debugging = true
+      # @instance.api_client.config.debugging = true
       data, status_code, headers = @instance.get_file_by_name_with_http_info(token, filename)
     rescue SwaggerClient::ApiError => ae
       output = {

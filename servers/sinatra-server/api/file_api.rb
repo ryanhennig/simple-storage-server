@@ -24,9 +24,24 @@ MyApp.add_route('DELETE', '/v1/files/{filename}', {
     },
     ]}) do
   cross_origin
-  # the guts live here
 
-  {"message" => "yes, it worked"}.to_json
+  username, error = get_user_from_session
+  if error
+    status 403
+    return {"error" => error}.to_json
+  end
+  
+  filename = params[:filename]
+    
+  if not /^[\w\-. ]+$/ === filename
+    status 403
+    # content_type "application/json"
+    # return {error: "Invalid filename"}.to_json
+  end
+  
+  error = MyApp.file_storage.delete_file(username, filename)
+  
+  status 204
 end
 
 MyApp.add_route('GET', '/v1/files', {
