@@ -125,9 +125,17 @@ MyApp.add_route('PUT', '/v1/files/{filename}', {
     return {error: "Invalid filename"}.to_json
   end
   
+  file_content = request.body.read
+  
+  error = MyApp.file_storage.write_file(username, filename, file_content)
+  
+  if error
+    status 403
+    return {"error" => error}.to_json
+  end
+    
   status 201
   headers["Location"] = "/files/#{filename}"
-  # location "/files/#{filename}"
 
 end
 

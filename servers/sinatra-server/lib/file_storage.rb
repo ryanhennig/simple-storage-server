@@ -20,16 +20,36 @@ class FileStorage
   
   def user_root(username)
     File.join(@storage_root, username)
+    
   end
   
   def get_filenames(username)
     []
   end
     
-  def FileStorage.write_file(username, filename, content)
+  def write_file(username, filename, content)
     error = nil
     
-    return error
+    begin
+      parent_dir = user_root(username)
+      
+      if not Dir.exists?(parent_dir)
+        FileUtils.mkdir_p(parent_dir)
+        FileUtils.chmod(0700, parent_dir)
+      end
+      
+      fullpath = File.join(parent_dir, filename)
+      
+      File.open(fullpath, "w") do |f|
+        f.write(content)
+      end
+      FileUtils.chmod(0700, fullpath)
+      
+    rescue => e
+      return e.to_s
+    end
+    
+    return nil
   end
   
 end
