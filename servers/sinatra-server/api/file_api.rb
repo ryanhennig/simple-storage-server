@@ -76,45 +76,11 @@ MyApp.add_route('GET', '/v1/files', {
   cross_origin
   
   content_type "application/json"
-
-  req = request_headers
-
-  if not req.include? "x_session"
-    status 403
-    return {"error" => "x_session parameter missing. headers: #{req.inspect}"}.to_json
-  end
   
-  token = req["x_session"].to_s
-  if not token
+  username, error = get_user_from_session
+  if error
     status 403
-    return {"error" => "token value missing"}.to_json
-  end
-  
-  db = MyApp.database
-
-  all_users = db.execute("SELECT username, session_token FROM users") 
-
-  # This doesn't work for some reason, so the workaround is to use interpolation and
-  # use a character whitelist to prevent SQL injection.
-  # results = db.execute("SELECT username FROM users WHERE session_token = ? ", [token])
-
-  if not /^[a-f0-9]+$/ === token
-    status 403    
-    return {"error" => "session token #{token} is invalid."}.to_json    
-  end
-
-  results = db.execute("SELECT username FROM users WHERE session_token = '#{token}' ")
-  if results.length == 0
-    status 403    
-    # return {"error" => "session token #{token} not found. results: #{results}
-    # all_users: #{all_users}"}.to_json
-  end
-
-  username = results[0][0]
-
-  if not username
-    status 403  
-    return
+    return {"error" => error}.to_json
   end
 
   file_list = FileStorage.get_filenames(username)
