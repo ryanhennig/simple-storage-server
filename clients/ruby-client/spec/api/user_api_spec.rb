@@ -32,7 +32,12 @@ describe 'UserApi' do
       "username": @valid_username,
       "password": @valid_password
     }
-
+    
+    @scriptdir = File.dirname(__FILE__)
+    @uploaddir = File.join(@scriptdir, "../file_uploads")
+    @downloaddir = File.join(@scriptdir, "../file_downloads")
+    
+    @textfile_path = File.join(@uploaddir, "textfile.txt")
   end
 
   after do
@@ -215,21 +220,24 @@ describe 'UserApi' do
   # @option opts [File] :file file to upload
   # @return [nil]
   describe 'upload_file test' do
-    it "should work", focus: true do
-      filename = "README.md"
-      file_path = File.expand_path(filename)
-      file_content = File.read(file_path)
+    it "should work for a file roundtrip", focus: true do
+      filename = File.basename(@textfile_path)
+      file_content = File.read(@textfile_path)
 
       # create_user_successfully(@valid_user)
       token = login_user_successfully(@valid_user)
       upload_file_successfully(token, filename, file_content)
+      
+      download_content = download_file_successfully(token, filename)
 
+      #Verify that the file content is the same
+      expect(file_content).to eql(download_content)
     end
     
     it "should not accept invalid filenames", focus: true do
-      filename = "README.md"
-      file_path = File.expand_path(filename)
-      file_content = File.read(file_path)
+
+      filename = File.basename(@textfile_path)
+      file_content = File.read(@textfile_path)
 
       # create_user_successfully(@valid_user)
       token = login_user_successfully(@valid_user)
@@ -256,6 +264,36 @@ describe 'UserApi' do
     expect(location).to eq("http://localhost:4567/files/#{filename}")
   
     return
+  end
+  
+  def download_file_successfully(token, filename, content_type = nil)
+    begin
+      @instance.api_client.config.debugging = true
+      data, status_code, headers = @instance.get_file_by_name_with_http_info(token, filename)
+    rescue SwaggerClient::ApiError => ae
+      output = {
+        "code": ae.code,
+        "response": ae.response_body
+      }
+      expect(output).to be_nil
+    end
+
+    expect(status_code).to eq(200)
+    expect(headers).to include("Content-Length")
+    expect(headers).to include("Content-Type")
+
+    if content_type
+      expect(headers["Content-Type"]).to eql(content_type)
+    end
+
+    tempfile = data
+    download_path = File.join(@downloaddir, filename)
+    FileUtils.cp(tempfile, download_path)
+    
+    file_content = File.read(@textfile_path)
+    expect(headers["Content-Length"]).to eql(file_content.length.to_s)
+
+    return file_content
   end
   
   def upload_file_failure(token, filename, file_content, error)

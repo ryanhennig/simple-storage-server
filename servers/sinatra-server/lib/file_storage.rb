@@ -52,4 +52,22 @@ class FileStorage
     return nil
   end
   
+  def read_file(username, filename)
+    parent_dir = user_root(username)
+    
+    if not Dir.exists?(parent_dir)
+      return nil, "User has no files"
+    end
+    
+    fullpath = File.join(parent_dir, filename)
+    
+    if not File.exists?(fullpath)
+      return nil, "File does not exist"
+    end
+    
+    content = File.read(fullpath)
+    
+    return content, nil
+  end
+  
 end

@@ -29,35 +29,6 @@ MyApp.add_route('DELETE', '/v1/files/{filename}', {
   {"message" => "yes, it worked"}.to_json
 end
 
-
-MyApp.add_route('GET', '/v1/files/{filename}', {
-  "resourcePath" => "/File",
-  "summary" => "download a file",
-  "nickname" => "get_file_by_name", 
-  "responseClass" => "file", 
-  "endpoint" => "/files/{filename}", 
-  "notes" => "Returns a single file",
-  "parameters" => [
-    {
-      "name" => "filename",
-      "description" => "name of the file",
-      "dataType" => "string",
-      "paramType" => "path",
-    },
-    {
-      "name" => "x_session",
-      "description" => "Session token given at login",
-      "dataType" => "string",
-      "paramType" => "header",
-    },
-    ]}) do
-  cross_origin
-  # the guts live here
-
-  {"message" => "yes, it worked"}.to_json
-end
-
-
 MyApp.add_route('GET', '/v1/files', {
   "resourcePath" => "/File",
   "summary" => "List the user's files",
@@ -136,6 +107,55 @@ MyApp.add_route('PUT', '/v1/files/{filename}', {
     
   status 201
   headers["Location"] = "/files/#{filename}"
+
+end
+
+
+MyApp.add_route('GET', '/v1/files/{filename}', {
+  "resourcePath" => "/File",
+  "summary" => "download a file",
+  "nickname" => "get_file_by_name", 
+  "responseClass" => "file", 
+  "endpoint" => "/files/{filename}", 
+  "notes" => "Returns a single file",
+  "parameters" => [
+    {
+      "name" => "filename",
+      "description" => "name of the file",
+      "dataType" => "string",
+      "paramType" => "path",
+    },
+    {
+      "name" => "x_session",
+      "description" => "Session token given at login",
+      "dataType" => "string",
+      "paramType" => "header",
+    },
+    ]}) do
+  cross_origin
+  
+  status 404
+  content_type "application/json"
+  
+  username, error = get_user_from_session
+  if error
+    return {"error" => error}.to_json
+  end
+  
+  filename = params[:filename]
+  
+  if not /^[\w\-. ]+$/ === filename
+    return {error: "Invalid filename"}.to_json
+  end
+  
+  file_content, error = MyApp.file_storage.read_file(username, filename)
+  if error
+    return {"error" => error}.to_json
+  end
+
+  status 200
+  content_type "application/octet-stream"
+  return file_content
 
 end
 

@@ -395,20 +395,11 @@ module SwaggerClient
       header_params['Content-Type'] = content_type
       header_params[:'X-Session'] = x_session
 
-      # form parameters
-      # form_params = {}
-      # form_params["file"] = opts[:'file'] if !opts[:'file'].nil?
-
       # http body (model)
-#      post_body = nil
-      # auth_names = []
       data, status_code, headers = @api_client.call_api(:PUT, local_var_path,
         :header_params => header_params,
         :query_params => query_params,
-        #:form_params => form_params,
-        # :body => post_body,
         :body => file_content
-        # :auth_names => auth_names
         )
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: FileApi#upload_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
