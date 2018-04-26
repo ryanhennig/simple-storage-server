@@ -86,6 +86,10 @@ class MyApp < Swaggering
     @@database ||= SQLite3::Database.new @@configuration.database_path
   end
   
+  def MyApp.file_storage
+    @@file_storage ||= FileStorage.new(@@configuration.file_storage_root)
+  end
+  
 end
 
 # include the api files

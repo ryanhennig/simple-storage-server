@@ -6,7 +6,7 @@ class Configuration
   attr_accessor :base_path, :api_version, :swagger_version, :format_specifier
   
   #The path of the SQLite Database file
-  attr_accessor :database_path
+  attr_accessor :database_path, :file_storage_root
   
   def initialize
     @api_version = '1.0'
@@ -15,6 +15,7 @@ class Configuration
     @format_specifier = ".json"
     
     @database_path = "users.db"
+    @file_storage_root = File.expand_path("./user_files")
   end
 end
 

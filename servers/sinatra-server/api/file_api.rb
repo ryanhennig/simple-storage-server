@@ -83,7 +83,7 @@ MyApp.add_route('GET', '/v1/files', {
     return {"error" => error}.to_json
   end
 
-  file_list = FileStorage.get_filenames(username)
+  file_list = MyApp.file_storage.get_filenames(username)
   file_list.to_json
 end
 
@@ -110,6 +110,12 @@ MyApp.add_route('PUT', '/v1/files/{filename}', {
     },
     ]}) do
   cross_origin
+  
+  username, error = get_user_from_session
+  if error
+    status 403
+    return {"error" => error}.to_json
+  end
   
   filename = params[:filename]
   

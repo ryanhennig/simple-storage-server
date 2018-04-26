@@ -23,18 +23,21 @@ MyApp.add_route('POST', '/v1/register', {
   
   body = request.body.read
   data = JSON.parse(body)
+
+  status 400  
+  content_type "application/json"
   
   username = data.fetch("username", nil)
   if not username or username.length < 3 or username.length > 20
-    status 400
-    content_type "application/json"
     return { error: "Invalid username"}.to_json
+  end
+  
+  if not /^[\w]+$/ === username
+    return { error: "Username has invalid characters"}.to_json
   end
   
   password = data.fetch("password", nil)
   if not password or password.length < 8
-    status 400
-    content_type "application/json"
     return { error: "Invalid password"}.to_json
   end
   
@@ -49,8 +52,6 @@ MyApp.add_route('POST', '/v1/register', {
   end
   
   if user_exists
-    status 400
-    content_type "application/json"
     return { error: "User already exists"}.to_json
   end
   
@@ -70,7 +71,7 @@ MyApp.add_route('POST', '/v1/register', {
   # end
   
   status 204
-
+  return ""
 end
 
 
